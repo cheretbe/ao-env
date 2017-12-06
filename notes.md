@@ -5,3 +5,5 @@
 * Git status like this: https://raw.github.com/nicksp/dotfiles/master/iterm/nick-terminal.png
     * powerline style
     * https://github.com/bhilburn/powerlevel9k
+    * https://github.com/powerline/fonts
+    * https://github.com/smkent/dotfiles
