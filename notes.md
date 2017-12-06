@@ -7,6 +7,7 @@
     * https://github.com/bhilburn/powerlevel9k
     * https://github.com/powerline/fonts
     * https://github.com/smkent/dotfiles
+    * https://github.com/ryanoasis/nerd-fonts#font-patcher
 
 * zsh
     * https://github.com/robbyrussell/oh-my-zsh
