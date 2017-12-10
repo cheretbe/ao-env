@@ -1,6 +1,6 @@
 python36.zip
 .
-../../python-packages
+../packages
 
 # Uncomment to run site.main() automatically
 import site
