@@ -33,3 +33,8 @@ POWERLEVEL9K_EXECUTION_TIME_ICON='\uF49B'
 
 source virtualenvwrapper.sh
 ```
+
+```
+reg.exe ADD "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_SZ /d ^"^%HOMEDRIVE^%^%HOMEPATH^%\projects\ao-env\windows\ao-env_autoexec.bat^" /f
+reg.exe ADD "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_SZ /d "%%HOMEDRIVE%%%%HOMEPATH%%\projects\ao-env\windows\ao-env_autoexec.bat" /f
+```
