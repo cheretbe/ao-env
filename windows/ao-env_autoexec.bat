@@ -2,9 +2,9 @@
 
 :: If PATH already ends with a ";" don't add an extra one
 IF "%PATH:~-1%"==";" (
-  SET PATH=%PATH%%HOMEDRIVE%%HOMEPATH%\projects\ao-env\windows
+  SET "PATH=%PATH%%~dp0"
 ) ELSE (
-  SET PATH=%PATH%;%HOMEDRIVE%%HOMEPATH%\projects\ao-env\windows
+  SET "PATH=%PATH%;%~dp0"
 )
 
 IF "%ProgramFiles(x86)%"=="" (
