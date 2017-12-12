@@ -1,4 +1,10 @@
 import subprocess
+import colorama
+
+colorama.init()
+
+def color_print(print_color, str):
+    print("{color}{str}{reset}".format(color=print_color, str=str, reset=colorama.Style.RESET_ALL))
 
 print("Fetching data from a remote repo")
 subprocess.check_call("git fetch", shell=True)
@@ -12,12 +18,16 @@ for line in subprocess.check_output("git submodule status --recursive", shell=Tr
     if line:
         text_status = ""
         status_char = line[:1]
+        status_color = colorama.Fore.GREEN
         if status_char == "-":
             text_status = " -- not initialized"
+            status_color = colorama.Fore.YELLOW
         elif status_char == "+":
             text_status = " -- needs update"
+            status_color = colorama.Fore.YELLOW
         elif status_char == "U":
             text_status = " -- has merge conflicts"
-        print("{line}{status}".format(line=line, status=text_status))
+            status_color = colorama.Fore.RED
+        color_print(status_color, "{line}{status}".format(line=line, status=text_status))
 
 subprocess.check_call("git status", shell=True)
