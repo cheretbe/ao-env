@@ -42,3 +42,9 @@ FOR /F "EOL=; TOKENS=1,2 DELIMS==" %%A IN ('TYPE "%~dp0..\variables.cfg"') DO (
 )
 
 :skip_variables
+
+IF "%ProgramFiles(x86)%"=="" (
+  "%~dp0clink\clink_x86.exe" inject --quiet
+) ELSE (
+  "%~dp0clink\clink_x64.exe" inject --quiet
+)
