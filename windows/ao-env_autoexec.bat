@@ -1,5 +1,7 @@
 @ECHO OFF
 
+IF "%AO_ENV_INITIALIZED%"=="1" EXIT /B 0
+
 IF "%ProgramFiles(x86)%"=="" (
   SET AO_ENV_PYTHON_PATH=%~dp0python\x86
 ) ELSE (
@@ -30,3 +32,5 @@ IF "%PATH:~-1%"==";" (
 
 :skip_add_to_path
 POPD
+
+SET AO_ENV_INITIALIZED=1
