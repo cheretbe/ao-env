@@ -1,0 +1,5 @@
+; Copy this file to variables.cfg
+; Comment character is ";"
+; No empty lines allowed
+AO_VAGRANT_USER=user
+AO_VAGRANT_TOKEN=token
