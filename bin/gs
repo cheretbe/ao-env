@@ -7,7 +7,7 @@ colorama.init()
 def color_print(print_color, str):
     print("{color}{str}{reset}".format(color=print_color, str=str, reset=colorama.Style.RESET_ALL))
 
-print("Fetching data from a remote repo")
+print("Fetching origin")
 subprocess.check_call("git fetch", shell=True)
 
 #not_initialized = False
