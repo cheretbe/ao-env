@@ -1,3 +1,4 @@
+/variables.cfg
 .cache/
 __pycache__/
 *.pyc

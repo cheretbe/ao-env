@@ -1,6 +1,7 @@
 @ECHO OFF
 
 IF "%AO_ENV_INITIALIZED%"=="1" EXIT /B 0
+SET AO_ENV_INITIALIZED=1
 
 IF "%ProgramFiles(x86)%"=="" (
   SET AO_ENV_PYTHON_PATH=%~dp0python\x86
@@ -33,4 +34,11 @@ IF "%PATH:~-1%"==";" (
 :skip_add_to_path
 POPD
 
-SET AO_ENV_INITIALIZED=1
+IF NOT EXIST "%~dp0..\variables.cfg" GOTO :skip_variables
+
+FOR /F "EOL=; TOKENS=1,2 DELIMS==" %%A IN ('TYPE "%~dp0..\variables.cfg"') DO (
+  SET %%A=%%B
+  IF /I "%~1"=="--verbose" ECHO.  %%A=%%B
+)
+
+:skip_variables
