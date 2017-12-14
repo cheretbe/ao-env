@@ -1,1 +1,2 @@
-oh-my-zsh    cloned from github 14.12.2016 (git clone --depth=1 https://github.com/robbyrussell/oh-my-zsh.git)
+oh-my-zsh    cloned from github 14.12.2017 (git clone --depth=1 https://github.com/robbyrussell/oh-my-zsh.git)
+powerlevel9k cloned from github 14.12.2017 https://github.com/bhilburn/powerlevel9k.git
