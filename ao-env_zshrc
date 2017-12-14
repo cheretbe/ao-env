@@ -1,5 +1,8 @@
 ao_env_root=${0:a:h}
 if [ ! -L "${ao_env_root}/oh-my-zsh/custom/themes/powerlevel9k" ]; then
+  if [ ! -d "${ao_env_root}/oh-my-zsh/custom/themes" ]; then
+    mkdir -p "${ao_env_root}/oh-my-zsh/custom/themes"
+  fi
   ln -s "${ao_env_root}/powerlevel9k" "${ao_env_root}/oh-my-zsh/custom/themes/powerlevel9k"
 fi
 
