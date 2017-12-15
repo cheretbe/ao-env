@@ -38,3 +38,10 @@ source virtualenvwrapper.sh
 reg.exe ADD "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_SZ /d ^"^%HOMEDRIVE^%^%HOMEPATH^%\projects\ao-env\windows\ao-env_autoexec.bat^" /f
 reg.exe ADD "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_SZ /d "%%HOMEDRIVE%%%%HOMEPATH%%\projects\ao-env\windows\ao-env_autoexec.bat" /f
 ```
+
+```zsh
+# Get list of supported colors
+for code ({000..255}) print -P -- "$code: %K{$code}      %k%F{$code}\uE0B0 Foreground%f"
+# Background/foreground combination test
+(fcolor=009; bcolor=002; print -P "%K{$bcolor}%F{$fcolor} Color test %f%k%F{$bcolor}\uE0B0%f")
+```
