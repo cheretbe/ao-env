@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+import subprocess
+import sys
+
+#subprocess.check_call("git " + " ".join(sys.argv[1:]) + " log --all --decorate --oneline --graph", shell=True)
+subprocess.check_call("git log --all --decorate --oneline --graph " + " ".join(sys.argv[1:]), shell=True)
+
