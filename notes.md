@@ -45,3 +45,9 @@ for code ({000..255}) print -P -- "$code: %K{$code}      %k%F{$code}\uE0B0 Foreg
 # Background/foreground combination test
 (fcolor=009; bcolor=002; print -P "%K{$bcolor}%F{$fcolor} Color test %f%k%F{$bcolor}\uE0B0%f")
 ```
+
+fonts
+```
+https://github.com/PygmalionPolymorph/dotfiles/blob/master/import_gnome_terminal
+.local/share/fonts
+```
