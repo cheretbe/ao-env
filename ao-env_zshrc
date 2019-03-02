@@ -1,17 +1,16 @@
 ao_env_root=${0:a:h}
-if [ ! -L "${ao_env_root}/oh-my-zsh/custom/themes/powerlevel9k" ]; then
-  if [ ! -d "${ao_env_root}/oh-my-zsh/custom/themes" ]; then
-    mkdir -p "${ao_env_root}/oh-my-zsh/custom/themes"
-  fi
-  ln -s "${ao_env_root}/powerlevel9k" "${ao_env_root}/oh-my-zsh/custom/themes/powerlevel9k"
-fi
 
 if [[ ":$PATH:" != *":${ao_env_root}/bin:"* ]]; then
   export PATH=${ao_env_root}/bin:$PATH
 fi
 
-# Path to oh-my-zsh installation.
+# Path to oh-my-zsh installation
 export ZSH=${ao_env_root}/oh-my-zsh
+# Path to custom config files
+# We don't put it in 'oh-my-zsh/custom' because this directory is ignored by default
+# and we don't want to change anything in oh-my-zsh (to be able to update it just by
+# checking out the current version)
+ZSH_CUSTOM=${ao_env_root}/oh-my-zsh_custom
 
 # Disable oh-my-zsh auto-update
 DISABLE_AUTO_UPDATE="true"
