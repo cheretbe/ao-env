@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import subprocess
+import types
+
+def run_dialog(parameters, env):
+    dialog_cmd = ["dialog"] + parameters
+    dialog_env = os.environ.copy()
+    dialog_env.update(env)
+    proc = subprocess.Popen(dialog_cmd, stderr = subprocess.PIPE, env=dialog_env)
+    stderr = proc.communicate()[1]
+    if proc.returncode == 2:
+        sys.exit("Cancelled by user")
+    elif proc.returncode == 0:
+        return (True, stderr.decode("utf-8").replace("HELP ", ""))
+    elif proc.returncode == 3:
+        return (False, stderr.decode("utf-8"))
+    else:
+        print(stderr.decode("utf-8"))
+        raise subprocess.CalledProcessError(proc.returncode, dialog_cmd, output=stderr)
+
+
+def run_first_step(title, dialog_parameters):
+    dialog_env = {
+        "DIALOG_ESC":  "2",
+        "DIALOG_OK":   "2",
+        "DIALOG_HELP": "0"
+    }
+    dialog_parameters = [
+            "--keep-tite",
+            "--title", title,
+            "--ok-label", "Cancel",
+            "--no-cancel",
+            "--help-button", "--help-label", "Next",
+            "--default-button", "help",
+        ] + dialog_parameters
+    return run_dialog(dialog_parameters, dialog_env)
+
+def run_normal_step(title, dialog_parameters):
+    dialog_env = {
+        "DIALOG_ESC":  "2",
+        "DIALOG_OK":   "2",
+        "DIALOG_HELP": "0"
+    }
+    dialog_parameters = [
+            "--keep-tite",
+            "--title", title,
+            "--ok-label", "Cancel",
+            "--no-cancel",
+            "--extra-button", "--extra-label", "Back",
+            "--help-button", "--help-label", "Next",
+            "--default-button", "help",
+        ] + dialog_parameters
+    return run_dialog(dialog_parameters, dialog_env)
+
+def run_last_step(title, dialog_parameters):
+    dialog_env = {
+        "DIALOG_ESC":  "2",
+        "DIALOG_OK":   "2",
+        "DIALOG_HELP": "0"
+    }
+    dialog_parameters = [
+            "--keep-tite",
+            "--title", title,
+            "--ok-label", "Cancel",
+            "--no-cancel",
+            "--extra-button", "--extra-label", "Back",
+            "--help-button", "--help-label", "Finish",
+            "--default-button", "help",
+        ] + dialog_parameters
+    return run_dialog(dialog_parameters, dialog_env)
+
+def get_vm_count(current_vm_count):
+    dialog_params = ["--no-tags",
+        "--default-item", str(current_vm_count),
+        "--menu", "Select VM count:",
+        "0", "0", "0",
+        "1", "Single VM",
+        "2", "2 VMs",
+        "3", "3 VMs"
+    ]
+    forward, selection = run_first_step("Create Vagranfile", dialog_params)
+    return int(selection)
+
+def finish_wizard():
+    dialog_params = ["--no-tags",
+        "--msgbox", "\nSelect 'Finish' to write a Vagrantfile\n"
+        "based on select options\n\n",
+        "0", "0"
+    ]
+    forward, selection = run_last_step("Create Vagranfile", dialog_params)
+    # print(f"forward: {forward}")
+    return forward
+
+
+wizard_steps = [types.SimpleNamespace(state="init", vm_count=1)]
+wizard_idx = 0
+
+while True:
+    c_step = wizard_steps[wizard_idx]
+    if c_step.state == "init":
+        c_step.vm_count = get_vm_count(c_step.vm_count)
+        wizard_steps += [types.SimpleNamespace(state="finish")]
+        wizard_idx += 1
+    elif c_step.state == "finish":
+        if finish_wizard():
+            break
+        else:
+            wizard_idx -= 1
