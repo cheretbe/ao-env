@@ -163,7 +163,7 @@ class EditFrame(WizardFrame):
         self._layout.add_widget(self._vm_name_edit, 1)
 
         self._layout.add_widget(
-            DropdownList(VAGRANT_BOX_NAMES, label="Box name", name="box_name"),
+            DropdownList(VAGRANT_BOX_NAMES, label="Box name:", name="box_name"),
             1
         )
 
@@ -225,6 +225,14 @@ class EditFrame(WizardFrame):
             validator="^[0-9]*$"
         )
         self._layout.add_widget(self._extra_drive_size_edit, 1)
+
+        self._layout.add_widget(Divider(height=1, draw_line=False), 1)
+        self._ip_address_edit = Text(
+            label="IP address:",
+            name="ip_address"
+        )
+        self._layout.add_widget(self._ip_address_edit, 1)
+        self._ip_address_edit.disabled = not frame_data.intnet_is_present
 
         self.data = frame_data.controls_data
         self.fix()
@@ -314,6 +322,12 @@ def set_edit_step_data(vm_index, data):
 
     if not data.vbguest_plugin_is_present:
         data.controls_data["enable_vbguest"] = False
+
+    if data.intnet_is_present:
+        if data.controls_data.get("ip_address") in [None, ""]:
+            data.controls_data["ip_address"] = "172.24.0.{}".format(10 + vm_index)
+    else:
+        data.controls_data["ip_address"] = ""
 
 def get_template_file(file_name):
     return pathlib.Path(__file__).resolve().parent.parent / \
@@ -446,6 +460,8 @@ def write_vagrantfile(v_file, steps):
                     box=box_name
                 )
             )
+            if multi_vm:
+                v_file.write(f'{padding}{config_var}.vm.hostname = "{vm_name}"\n')
 
             v_file.write(f'{padding}{config_var}.vm.provider "virtualbox" do |vb|\n')
             if steps[0].controls_data["add_config"]:
@@ -481,9 +497,10 @@ def write_vagrantfile(v_file, steps):
                 )
 
             if intnet_name != "":
+                ip_address = step.controls_data["ip_address"]
                 v_file.write(
                     f'{padding}{config_var}.vm.network "private_network", '
-                    f'type: "dhcp", virtualbox__intnet: "{intnet_name}"\n'
+                    f'ip: "{ip_address}", virtualbox__intnet: "{intnet_name}"\n'
                 )
 
             if step.controls_data["inline_shell_provision"]:
