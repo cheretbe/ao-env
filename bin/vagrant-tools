@@ -9,6 +9,7 @@ import enum
 import textwrap
 import subprocess
 import pathlib
+import shutil
 
 from asciimatics.widgets import Frame, Layout, Label, Divider, Text, CheckBox, \
     RadioButtons, Button, DropdownList, PopUpDialog, Background
@@ -181,6 +182,10 @@ class EditFrame(WizardFrame):
         self._enable_vbguest_checkbox.disabled = not frame_data.vbguest_plugin_is_present
 
         self._layout.add_widget(
+            CheckBox("Add inline shell provision", name="inline_shell_provision"),
+            1
+        )
+        self._layout.add_widget(
             CheckBox("Add shell provision script", name="shell_provisioner"),
             1
         )
@@ -310,6 +315,10 @@ def set_edit_step_data(vm_index, data):
     if not data.vbguest_plugin_is_present:
         data.controls_data["enable_vbguest"] = False
 
+def get_template_file(file_name):
+    return pathlib.Path(__file__).resolve().parent.parent / \
+        "templates" / file_name
+
 
 def backup_current_vagrantfile():
     if os.path.isfile("Vagrantfile"):
@@ -399,9 +408,7 @@ def write_vagrantfile(v_file, steps):
         v_file.write(",\n".join(extra_hdds) + "\n")
         v_file.write("]\n\n")
 
-        include_file = pathlib.Path(__file__).resolve().parent.parent / \
-            "templates" / "vagrantfile_attach_disk.rb"
-        with include_file.open("r") as f:
+        with get_template_file("vagrantfile_attach_disk.rb").open("r") as f:
             v_file.write(f.read())
         v_file.write("\n")
 
@@ -478,6 +485,43 @@ def write_vagrantfile(v_file, steps):
                     f'{padding}{config_var}.vm.network "private_network", '
                     f'type: "dhcp", virtualbox__intnet: "{intnet_name}"\n'
                 )
+
+            if step.controls_data["inline_shell_provision"]:
+                v_file.write(f'{padding}{config_var}.vm.provision "shell", '
+                    'name: "Provision template",\n')
+                v_file.write(f'{padding}  keep_color: true, # privileged: false,\n')
+                v_file.write(f'{padding}  inline: <<-SHELL\n')
+                v_file.write(f'{padding}    set -euo pipefail\n')
+                v_file.write(f'{padding}    uname -a\n')
+                v_file.write(f'{padding}  SHELL\n')
+
+            if step.controls_data["shell_provisioner"]:
+                os.makedirs("provision", exist_ok=True)
+                script_name = f"{vm_name}_provision.sh" if multi_vm else "provision.sh"
+                if not os.path.isfile(f"./provision/{script_name}"):
+                    shutil.copyfile(
+                        str(get_template_file("vagrant_provision.sh")),
+                        f"./provision/{script_name}")
+                v_file.write("\n")
+                v_file.write(f'{padding}{config_var}.vm.provision "shell", '
+                    f'name: "Provision shell script",\n{padding}  '
+                    f'keep_color: true, path: "provision/{script_name}"\n')
+
+            if step.controls_data["ansible_provisioner"]:
+                os.makedirs("provision", exist_ok=True)
+                playbook_name = f"{vm_name}_provision.yml" if multi_vm else "provision.yml"
+                if not os.path.isfile(f"./provision/{playbook_name}"):
+                    shutil.copyfile(
+                        str(get_template_file("vagrant_provision.yml")),
+                        f"./provision/{playbook_name}")
+                v_file.write("\n")
+                v_file.write(f'{padding}{config_var}.vm.provision "ansible_local" do |ansible|\n')
+                v_file.write(f'{padding}  ansible.playbook = "provision/{playbook_name}"\n')
+                v_file.write(f'{padding}  ansible.compatibility_mode = "2.0"\n')
+                v_file.write(f'{padding}  ansible.extra_vars = {{\n')
+                v_file.write(f'{padding}    "ansible_python_interpreter": "/usr/bin/python3"\n')
+                v_file.write(f'{padding}  }}\n')
+                v_file.write(f'{padding}end\n')
 
             if multi_vm:
                 v_file.write("  end\n")
