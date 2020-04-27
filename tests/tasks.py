@@ -6,8 +6,7 @@ def run_docker_test(context, image):
         context.run(
             f"docker build . --build-arg base_image={image} --tag test-image:1.0 -f tests/docker/Dockerfile"
         )
-    context.run("docker run --rm --name test test-image:1.0 su - testuser -c /ao-env/install.sh")
-    # context.run("docker run --rm --name test test-image:1.0 /bin/sh -c 'ls -lha'")
+    context.run("docker run --rm --name test test-image:1.0 /ao-env/install.sh")
 
 @invoke.task(default=True)
 def help(context):
@@ -32,6 +31,6 @@ def interactive(context):
         )
     context.run(
         "docker run --rm  -ti -v /ao-env:/ao-env:ro --name test"
-        " test-image:1.0 su - testuser -c /bin/bash",
+        " test-image:1.0 /bin/bash",
         pty=True
     )

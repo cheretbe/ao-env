@@ -16,4 +16,5 @@ RUN set -xe && \
 
 COPY . .
 
+USER $TEST_USER
 #RUN /bin/bash
