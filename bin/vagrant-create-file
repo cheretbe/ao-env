@@ -4,7 +4,4 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if [ -z ${VIRTUAL_ENV+x} ]; then
-  . "${HOME}/.cache/ao-env/virtualenv-py3/bin/activate"
-fi
-"${script_dir}/vagrant-create-file.py"
+"${HOME}/.cache/ao-env/virtualenv-py3/bin/python3" "${script_dir}/vagrant-create-file.py"
