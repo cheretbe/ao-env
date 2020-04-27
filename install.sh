@@ -27,29 +27,25 @@ else
 fi
 
 echo "Creating '~/.local/share/fonts' directory"
-mkdir -p "~/.local/share/fonts"
+mkdir -p ~/.local/share/fonts
 
-# ln -sfn TARGET LINK_NAME
-ln -sfn "${ao_env_root}/fonts" "~/.local/share/fonts/ao-env"
+echo "Creating symlink ~/.local/share/fonts/ao-env ==> ${ao_env_root}/fonts"
+ln -sfn ${ao_env_root}/fonts ~/.local/share/fonts/ao-env
 
 virualenv_dir="${HOME}/.cache/ao-env/virtualenv-py3"
 echo "virualenv path: ${virualenv_dir}"
 
 if [ ! -d "${virualenv_dir}" ]; then
   echo "Creating virualenv"
-  # mkdir -p "${virualenv_dir}"
   python3 -m venv "${virualenv_dir}"
 fi
 
 . "${virualenv_dir}/bin/activate"
 # python3 -m site
+pip3 install wheel
 pip3 install colorama asciimatics
 
-exit 0
-
-if ! [ -x "$(command -v python3)" ]; then
-  apt-get update
-  apt-get -y -q install build-essential python3 python3-dev python3-venv
+if ! grep -q "export PATH=${ao_env_root}/bin:" ~/.profile; then
+  echo "Adding '${ao_env_root}/bin' to PATH"
+  echo -e "\nexport PATH=${ao_env_root}/bin:\$PATH\n" >> ~/.profile
 fi
-
-python3 ${ao_env_root}/install.py
