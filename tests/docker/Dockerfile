@@ -14,7 +14,9 @@ RUN set -xe && \
   echo "${TEST_USER} ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/${TEST_USER} && \
   chmod 0440 /etc/sudoers.d/${TEST_USER}
 
-COPY . .
+COPY . /home/testuser/.local/share/ao-env
+
+RUN chown -R testuser:testuser /home/testuser/.local
 
 USER $TEST_USER
 #RUN /bin/bash
