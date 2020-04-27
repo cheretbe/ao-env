@@ -4,7 +4,7 @@ set -euo
 ao_env_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 declare -a APT_PACKAGES=("build-essential" "python3" "python3-dev" "python3-venv"
-  "mc" "htop" "net-tools" "dnsutils" "mtr-tiny" "ncdu" "wget" "git"
+  "dialog" "mc" "htop" "net-tools" "dnsutils" "mtr-tiny" "ncdu" "wget" "git"
   "nano" "traceroute" "colordiff" "jq" "pv")
 
 all_pkgs_installed=true
