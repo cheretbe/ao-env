@@ -15,9 +15,10 @@ fi
 
 case ${result} in
   "1")
-  echo "Update and cleanup"
+  "${script_dir}/vagrant-box-update"
   ;;
 
   "2")
   "${script_dir}/vagrant-create-file"
+  ;;
 esac

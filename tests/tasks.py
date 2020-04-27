@@ -6,7 +6,10 @@ def run_docker_test(context, image):
         context.run(
             f"docker build . --build-arg base_image={image} --tag test-image:1.0 -f tests/docker/Dockerfile"
         )
-    context.run("docker run --rm --name test test-image:1.0 /ao-env/install.sh")
+    context.run(
+        "docker run --rm --name test test-image:1.0 "
+        "/home/testuser/.local/share/ao-env/install.sh"
+    )
 
 @invoke.task(default=True)
 def help(context):

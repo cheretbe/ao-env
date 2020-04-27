@@ -1,7 +1,7 @@
 ARG base_image
 
 FROM ${base_image}
-WORKDIR /ao-env
+WORKDIR /
 
 ENV TEST_USER=testuser SUDO_GROUP=sudo
 RUN set -xe && \

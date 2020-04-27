@@ -43,7 +43,7 @@ fi
 . "${virualenv_dir}/bin/activate"
 # python3 -m site
 pip3 install wheel
-pip3 install colorama asciimatics
+pip3 install colorama asciimatics humanfriendly
 
 if ! grep -q "export PATH=${ao_env_root}/bin:" ~/.profile; then
   echo "Adding '${ao_env_root}/bin' to PATH"
