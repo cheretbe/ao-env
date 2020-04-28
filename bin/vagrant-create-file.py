@@ -343,6 +343,25 @@ def backup_current_vagrantfile():
         os.rename("Vagrantfile", f"Vagrantfile.{counter}")
 
 
+def append_line_to_file(file_name, line_to_append):
+    # Create empty file if does not exist
+    open(file_name, "a").close()
+
+    with open(file_name, "r+") as f:
+        for line in f:
+            if line_to_append in line:
+                break
+        else:
+            # Not found, we at the EOF
+            # Add newline if file is not empty and does not end with a newline
+            if f.tell() > 0:
+                f.seek(f.tell() - 1)
+            last_char = f.read(1)
+            if not last_char in ["", "\n"]:
+                f.write("\n")
+            f.write(f"{line_to_append}\n")
+
+
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def write_vagrantfile(v_file, steps):
     multi_vm = steps[0].controls_data["vm_count"] > 1
@@ -350,6 +369,17 @@ def write_vagrantfile(v_file, steps):
         intnet_name = steps[0].controls_data["intnet_name"]
     else:
         intnet_name = ""
+
+    # pylint: disable=subprocess-run-check
+    proc = subprocess.run(
+        ["git", "rev-parse", "--git-dir"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    is_git_repo = proc.returncode == 0
+
+    if is_git_repo:
+        append_line_to_file(".gitignore", "/.vagrant/")
 
     if steps[0].controls_data["require_vagrant_vbguest"]:
         # pylint: disable=line-too-long
@@ -389,20 +419,8 @@ def write_vagrantfile(v_file, steps):
                 f.write("---\n")
                 f.write("# vm_memory: \"2048\"\n")
                 f.write("# vm_cpus: \"2\"\n")
-        # pylint: disable=subprocess-run-check
-        proc = subprocess.run(
-            ["git", "rev-parse", "--git-dir"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        if proc.returncode == 0:
-            need_gitignore_update = True
-            if os.path.isfile(".gitignore"):
-                with open(".gitignore", "r") as f:
-                    need_gitignore_update = not any("local-config.yml" in line for line in f)
-            if need_gitignore_update:
-                with open(".gitignore", "a+") as f:
-                    f.write("local-config.yml\n")
+        if is_git_repo:
+            append_line_to_file(".gitignore", "local-config.yml")
 
     extra_hdds = []
     for step in wizard_steps:
@@ -504,8 +522,10 @@ def write_vagrantfile(v_file, steps):
                 )
 
             if step.controls_data["inline_shell_provision"]:
-                v_file.write(f'{padding}{config_var}.vm.provision "shell", '
-                    'name: "Provision template",\n')
+                v_file.write(
+                    f'{padding}{config_var}.vm.provision "shell", '
+                    'name: "Provision template",\n'
+                )
                 v_file.write(f'{padding}  keep_color: true, # privileged: false,\n')
                 v_file.write(f'{padding}  inline: <<-SHELL\n')
                 v_file.write(f'{padding}    set -euo pipefail\n')
@@ -520,9 +540,11 @@ def write_vagrantfile(v_file, steps):
                         str(get_template_file("vagrant_provision.sh")),
                         f"./provision/{script_name}")
                 v_file.write("\n")
-                v_file.write(f'{padding}{config_var}.vm.provision "shell", '
+                v_file.write(
+                    f'{padding}{config_var}.vm.provision "shell", '
                     f'name: "Provision shell script",\n{padding}  '
-                    f'keep_color: true, path: "provision/{script_name}"\n')
+                    f'keep_color: true, path: "provision/{script_name}"\n'
+                )
 
             if step.controls_data["ansible_provisioner"]:
                 os.makedirs("provision", exist_ok=True)
