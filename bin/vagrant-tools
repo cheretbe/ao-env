@@ -6,6 +6,7 @@ result=$(DIALOG_ESC=1 dialog --keep-tite --title "Vagrant tools" \
   --no-tags --menu "Select an action" 0 0 0 \
   1 "Boxes update and cleanup" \
   2 "Create Vagrantfile" \
+  3 "Publish a box to Vagrant Cloud" \
   3>&1 1>&2 2>&3 3>&-)
 
 if [ $? -ne 0 ]; then
@@ -20,5 +21,9 @@ case ${result} in
 
   "2")
   "${script_dir}/vagrant-create-file"
+  ;;
+
+  "3")
+  "${script_dir}/vagrant-box-publish"
   ;;
 esac
