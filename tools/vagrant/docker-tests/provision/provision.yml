@@ -31,3 +31,8 @@
       pip:
         name: [invoke, testinfra]
         executable: pip3
+
+    - name: Install additional Python 3 packages for unit tests
+      pip:
+        requirements: /ao-env/tests/requirements.txt
+        executable: pip3

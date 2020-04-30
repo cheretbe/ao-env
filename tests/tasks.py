@@ -17,11 +17,16 @@ def help(context):
     context.run('invoke --list')
 
 @invoke.task
+def unit_tests(context):
+    """Run unit tests on local machine"""
+    context.run("pytest -v unit_tests", pty=True)
+
+@invoke.task
 def test_ubuntu_bionic(context):
     """Run tests on Ubuntu 18.04"""
     run_docker_test(context, "ubuntu:18.04")
 
-@invoke.task(test_ubuntu_bionic)
+@invoke.task(unit_tests, test_ubuntu_bionic)
 def test(context):
     """Run all tests"""
 
