@@ -1,2 +1,4 @@
 pytest
+packaging
+requests
 PyInquirer
