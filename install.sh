@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo
+set -eu
 
 ao_env_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
