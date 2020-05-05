@@ -65,7 +65,7 @@ def select_box_file():
 def main():
     box_data = [
         {
-            "name": "docker-ce",
+            "name": "docker-tests",
             "description": "Ubuntu 18.04 with Docker CE and testing tools installed"
         },
         {
