@@ -1,8 +1,8 @@
 #pylint: disable=missing-module-docstring,missing-function-docstring
+import colorama
 #pylint: disable=import-error
 import invoke
 #pylint: enable=import-error
-import colorama
 
 
 colorama.init()
@@ -19,7 +19,8 @@ def run_docker_test(context, image):
         # context.run("ls /aaa")
         context.run("docker run -dt --name test  test-image:1.0 /bin/sh")
         context.run(
-            "docker exec test /home/testuser/.local/share/ao-env/install.sh"
+            "docker exec --env DEBIAN_FRONTEND=noninteractive "
+            "test /home/testuser/.local/share/ao-env/install.sh"
         )
         context.run(
             "py.test --hosts='docker://test' -v installer_tests",

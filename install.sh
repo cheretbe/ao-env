@@ -23,7 +23,11 @@ else
   sudo -- sh -c '/usr/bin/apt-get -qq update'
   PKGS="${APT_PACKAGES[@]}"
   echo "About to install the following packages: ${PKGS}"
-  sudo PKGS="${PKGS}" -- sh -c '/usr/bin/apt-get -y -qq install ${PKGS}'
+  if [ -v DEBIAN_FRONTEND ]; then
+    sudo DEBIAN_FRONTEND="${DEBIAN_FRONTEND}" PKGS="${PKGS}" -- sh -c '/usr/bin/apt-get -y -qq install ${PKGS}'
+  else
+    sudo PKGS="${PKGS}" -- sh -c '/usr/bin/apt-get -y -qq install ${PKGS}'
+  fi
 fi
 
 echo "Creating '~/.local/share/fonts' directory"
