@@ -7,7 +7,7 @@ import argparse
 import datetime
 import pathlib
 import subprocess
-import packaging
+import packaging.version
 import requests
 import PyInquirer
 
