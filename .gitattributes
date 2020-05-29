@@ -6,6 +6,9 @@
 *.md            text
 *.gitattributes text
 
+# Declare files that will always have LF line endings on checkout.
+*.py     text  eol=lf
+
 # Declare files that will always have CRLF line endings on checkout.
 *.ps1    text  eol=crlf
 *.psm1   text  eol=crlf
@@ -15,6 +18,7 @@
 *.clixml text  eol=crlf
 *.xml    text  eol=crlf
 *.txt    text  eol=crlf
+*.bat    text  eol=crlf
 
 # Denote all files that are truly binary and should not be mergeable.
 *.dll binary
