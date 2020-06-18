@@ -3,13 +3,14 @@
 # pylint: disable=invalid-name,missing-module-docstring,missing-function-docstring
 
 import sys
+import os
 import argparse
 import datetime
 import pathlib
 import subprocess
-import packaging.version
 import requests
 import PyInquirer
+import packaging.version
 
 
 def ask_for_confirmation(prompt):
@@ -62,7 +63,7 @@ def select_box_file():
     return answers["boxfile"]
 
 
-def main():
+def main():  # pylint: disable=too-many-branches,too-many-statements
     box_data = [
         {
             "name": "docker-tests",
@@ -128,22 +129,33 @@ def main():
     if not cloud_user_name:
         raise Exception("Could not detect current Vagrant Cloud user name")
 
-    answers = PyInquirer.prompt(
-        questions=[
-            {
-                'type': 'list',
-                'name': 'box',
-                'message': 'Select a name to publish a box under',
-                'choices': [i["name"] for i in box_data]
-            }
-        ]
-    )
-    if not answers:
-        sys.exit(1)
-    box_name = answers["box"]
-    box_description = next(i for i in box_data if i["name"] == box_name)["description"]
 
+    box_file_obj = pathlib.Path(options.box_file)
+    if box_file_obj.name == "package.box":
+        answers = PyInquirer.prompt(
+            questions=[
+                {
+                    'type': 'list',
+                    'name': 'box',
+                    'message': 'Select a name to publish a box under',
+                    'choices': [i["name"] for i in box_data]
+                }
+            ]
+        )
+        if not answers:
+            sys.exit(1)
+        box_name = answers["box"]
+    else:
+        box_name = box_file_obj.stem
     print(f"'{cloud_user_name}/{box_name}' is selected")
+
+    box_description = ""
+    box_data_item = next((i for i in box_data if i["name"] == box_name), None)
+    if box_data_item:
+        box_description = box_data_item["description"]
+    if os.path.isfile("box_description.md"):
+        with open("box_description.md", "r") as desc_f:
+            box_description = desc_f.read()
 
     response = requests.get(
         f"https://app.vagrantup.com/api/v1/box/{cloud_user_name}/{box_name}"
@@ -160,36 +172,58 @@ def main():
         print(f"There is no currently released version of '{cloud_user_name}/{box_name}'")
         new_version = options.box_ver + options.version_separator + "0"
 
+        # For a newly created box we need a description
+        if not box_description:
+            answers = PyInquirer.prompt(
+                questions=[
+                    {
+                        "type": "editor",
+                        "name": "box_description",
+                        "message": "Please enter a box description (Alt+Enter to finish)\n",
+                        "default": box_description
+                    }
+                ]
+            )
+            if not answers:
+                sys.exit(1)
+            box_description = answers["box_description"]
+
+
     if not ask_for_confirmation(
             f"Do you want to release '{options.box_file}' as '{cloud_user_name}/{box_name}' "
             f"version {new_version}?"
     ):
         sys.exit("Cancelled by user")
 
+    if os.path.isfile("version_description.md"):
+        with open("version_description.md", "r") as desc_f:
+            version_description = desc_f.read()
+    else:
+        version_description = datetime.datetime.now().strftime("**%d.%m.%Y update**")
     answers = PyInquirer.prompt(
         questions=[
             {
                 "type": "editor",
-                "name": "description",
-                "message": "Please enter a version description (Alt+Enter to finish)",
-                "default": box_description
+                "name": "version_description",
+                "message": "Please enter a version description (Alt+Enter to finish)\n",
+                "default": version_description
             }
         ]
     )
     if not answers:
         sys.exit(1)
-    version_description = answers["description"]
+    version_description = answers["version_description"]
 
     print(f"Publishing '{options.box_file}' as '{cloud_user_name}/{box_name}'version {new_version}")
-    subprocess.check_call(
-        f"vagrant cloud publish '{cloud_user_name}/{box_name}' "
-        f"{new_version} virtualbox {options.box_file} "
-        f"--short-description '{box_description}' "
-        f"--version-description '{version_description}' "
-        "--release --force",
-        shell=True
-    )
-
+    vagrant_parameters = [
+        "vagrant", "cloud", "publish", f"{cloud_user_name}/{box_name}",
+        new_version, "virtualbox", options.box_file,
+        "--version-description", version_description,
+        "--release", "--force"
+    ]
+    if box_description:
+        vagrant_parameters += ["--short-description", box_description]
+    subprocess.check_call(vagrant_parameters)
 
 if __name__ == '__main__':
     main()
