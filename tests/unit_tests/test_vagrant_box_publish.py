@@ -32,7 +32,7 @@ class TestIncVersion(unittest.TestCase):
     def test_lower_base_version(self):
         """It should throw an exception if supplied base version is lower"""
         with self.assertRaisesRegex(
-                Exception,
+                SystemExit,
                 "Version to be released \\(20200228\\) is lower than currently "
                 "released \\(20200229\\)"
         ):
@@ -50,10 +50,3 @@ class TestIncVersion(unittest.TestCase):
             separator="-"
         )
         self.assertEqual(new_version, "3.4.5-3")
-
-        new_version = vagrant_box_publish.inc_version_release(
-            new_base_version="3.4.6",
-            current_version="3.4.5_3",
-            separator="_"
-        )
-        self.assertEqual(new_version, "3.4.6_0")

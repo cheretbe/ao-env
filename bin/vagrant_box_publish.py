@@ -44,7 +44,7 @@ def inc_version_release(new_base_version, current_version, separator):
     elif packaging.version.parse(new_base_version) > packaging.version.parse(current_version):
         new_version = new_base_version + separator + "0"
     else:
-        raise Exception(
+        sys.exit(
             f"Version to be released ({new_base_version}) is lower than currently "
             f"released ({current_base_version})"
         )
@@ -58,7 +58,7 @@ def select_box_file(batch_mode):
             "Can't find any *.box files in current directory and subdirectories"
         )
     if len(box_files) == 1:
-        return box_files[0]
+        return str(box_files[0])
     if batch_mode:
         sys.exit(
             "More than one box file has been found. Will not display selection "
@@ -77,7 +77,7 @@ def select_box_file(batch_mode):
     )
     if not answers:
         sys.exit("Cancelled by user")
-    return answers["boxfile"]
+    return str(answers["boxfile"])
 
 
 # By default login token is in ~/.vagrant.d/data/vagrant_login_token
@@ -188,10 +188,7 @@ def get_current_cloud_box_version(cloud_user_name, box_name):
     return current_version
 
 def get_version_description(box_file, batch_mode):
-    # box_file_path = pathlib.Path(box_file)
-    # description_md = box_file_path.parent / (box_file_path.stem + ".md")
     description_md = pathlib.Path(box_file).with_suffix(".md")
-    # print(str(description_md))
     if description_md.exists():
         print(f"Reading version description from '{str(description_md)}'")
         with open(str(description_md), "r") as desc_f:
@@ -233,8 +230,7 @@ def publish_box( # pylint: disable=too-many-arguments
     print(vagrant_parameters)
     # subprocess.check_call(vagrant_parameters)
 
-
-def main():
+def parse_arguments():
     parser = argparse.ArgumentParser(description="Publish boxes to Vagrant Cloud")
     parser.add_argument(
         "box_ver",
@@ -265,24 +261,19 @@ def main():
         default=False,
         help="Batch mode (disables all interactive prompts)"
     )
-    parser.add_argument(
-        "-d", "--dry-run",
-        action="store_true",
-        default=False,
-        help=(
-            "Dry run mode (doesn't actually publish a box, just echoes corresponding "
-            "vagrant command line to be called)"
-        )
-    )
+    return parser.parse_args()
 
-    options = parser.parse_args()
+
+def main():
+    options = parse_arguments()
 
     if options.box_file == "":
         options.box_file = select_box_file(batch_mode=options.batch)
     print(f"Box file name: {options.box_file}")
+    if not pathlib.Path(options.box_file).is_file():
+        sys.exit(f"File doesn't exist: {options.box_file}")
 
-    # cloud_user_name = check_vagrant_cloud_login(options.batch)
-    cloud_user_name = "cheretbe"
+    cloud_user_name = check_vagrant_cloud_login(options.batch)
 
     box_name, box_version = get_box_name_and_version(
         box_file=options.box_file,
@@ -323,16 +314,6 @@ def main():
         default=True
     )
 
-    # print(f"Publishing '{options.box_file}' as '{cloud_user_name}/{box_name}'version {new_version}")
-    # vagrant_parameters = [
-    #     "vagrant", "cloud", "publish", f"{cloud_user_name}/{box_name}",
-    #     new_version, "virtualbox", options.box_file,
-    #     "--version-description", version_description,
-    #     "--release", "--force"
-    # ]
-    # if box_description:
-    #     vagrant_parameters += ["--short-description", box_description]
-    # subprocess.check_call(vagrant_parameters)
     publish_box(
         box_file=options.box_file,
         cloud_user_name=cloud_user_name,
