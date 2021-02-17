@@ -216,7 +216,7 @@ def get_version_description(box_file, batch_mode):
 
 def publish_box( # pylint: disable=too-many-arguments
         box_file, cloud_user_name, box_name, box_version,
-        box_description, version_description
+        box_description, version_description, dry_run_mode
     ):
     print(f"Publishing '{box_file}' as '{cloud_user_name}/{box_name}'version {box_version}")
     vagrant_parameters = [
@@ -227,8 +227,11 @@ def publish_box( # pylint: disable=too-many-arguments
     ]
     if box_description:
         vagrant_parameters += ["--short-description", box_description]
-    print(vagrant_parameters)
-    # subprocess.check_call(vagrant_parameters)
+    if dry_run_mode:
+        print("Dry-run mode is on. Skipping vagrant cloud call")
+        print(vagrant_parameters)
+    else:
+        subprocess.check_call(vagrant_parameters)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Publish boxes to Vagrant Cloud")
@@ -260,6 +263,15 @@ def parse_arguments():
         action="store_true",
         default=False,
         help="Batch mode (disables all interactive prompts)"
+    )
+    parser.add_argument(
+        "-d", "--dry-run",
+        action="store_true",
+        default=False,
+        help=(
+            "Dry run mode (doesn't actually publish a box, just echoes vagrant "
+            "cloud command to be called)"
+        )
     )
     return parser.parse_args()
 
@@ -320,7 +332,8 @@ def main():
         box_name=box_name,
         box_version=new_version,
         box_description=box_description,
-        version_description=version_description
+        version_description=version_description,
+        dry_run_mode=options.dry_run
     )
 
 if __name__ == '__main__':
