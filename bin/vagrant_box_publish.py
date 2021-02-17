@@ -121,15 +121,15 @@ def get_box_name_and_version(box_file, explicit_name, explicit_version):
         idx = len(box_file_name) - 1
         while idx >= 0:
             token = box_file_name[idx]
-            if not token.isdigit() or (token in [".", "-"]):
+            if not (token.isdigit() or (token in [".", "-"])):
                 break
             idx -= 1
         if idx == len(box_file_name) - 1:
             box_name = box_file_name
             box_version = ""
         else:
-            box_name = box_file_name[0: idx - 2]
-            box_version = box_file_name[idx - len(box_file_name) - 1:]
+            box_name = box_file_name[0: idx]
+            box_version = box_file_name[idx + 1:]
     if explicit_name:
         box_name = explicit_name
     if explicit_version:
@@ -293,7 +293,7 @@ def main():
         explicit_version=options.box_ver
     )
 
-    print(f"Publishing '{cloud_user_name}/{box_name}'")
+    print(f"Publishing '{cloud_user_name}/{box_name}' {box_version}")
 
     current_version = get_current_cloud_box_version(cloud_user_name, box_name)
     if current_version:

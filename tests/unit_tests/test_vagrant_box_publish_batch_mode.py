@@ -3,7 +3,6 @@
 import sys
 import os
 import types
-import datetime
 import pathlib
 import contextlib
 import pytest
@@ -35,7 +34,8 @@ def mock_script_params(mocker_obj, **kwargs):
         "box_file": "",
         "box_name": "",
         "box_ver": "",
-        "version_separator": "."
+        "version_separator": ".",
+        "dry_run": False
     }
     # Update defaults with explicitly set values
     script_params.update(kwargs)
@@ -132,7 +132,8 @@ def test_no_files_plus_box_option_new_box(tmpdir, mocker, requests_mock):
         box_file='subdir/test-file.box',
         box_name='test-file', box_version='20140331.0',
         cloud_user_name='test-user-name',
-        version_description="**31.03.2014 update**"
+        version_description="**31.03.2014 update**",
+        dry_run_mode=False
     )
 
 @freezegun.freeze_time("2012-01-14")
@@ -156,7 +157,8 @@ def test_single_file(tmpdir, mocker, requests_mock):
         box_file='test-file.box',
         box_name='test-file', box_version='20120114.0',
         cloud_user_name='test-user-name',
-        version_description="**14.01.2012 update**"
+        version_description="**14.01.2012 update**",
+        dry_run_mode=False
     )
 
 def test_multiple_files(tmpdir, mocker):
@@ -241,5 +243,6 @@ def test_version_description(tmpdir, mocker, requests_mock):
         box_file='test-file.box',
         box_name='test-file', box_version='20110101.1',
         cloud_user_name='test-user-name',
-        version_description="Version description **test**"
+        version_description="Version description **test**",
+        dry_run_mode=False
     )
