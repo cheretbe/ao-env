@@ -1,0 +1,6 @@
+pytest
+requests
+freezegun
+pyinquirer
+requests-mock
+pytest-mock
