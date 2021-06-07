@@ -7,6 +7,7 @@ def main():
     if subprocess.check_output(["git", "status", "--porcelain"]) == b"":
         if subprocess.check_output(["git", "diff", "@{u}"]) == b"":
             subprocess.check_call(["git", "pull"])
+            subprocess.check_call(["git", "status"])
         else:
             sys.exit("Will not pull as local Git repo has unpushed commits")
     else:
