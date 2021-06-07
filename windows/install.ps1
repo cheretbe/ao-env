@@ -7,7 +7,6 @@ $autoexecPath = Join-Path -Path $script:scriptDir -ChildPath "ao-env_autoexec.ba
 $existingValue = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Command Processor" `
   -Name "AutoRun" -ErrorAction SilentlyContinue
 
-# $existingValue = "aaa"
 if ($NULL -ne $existingValue) {
   $existingValue = $existingValue.PSObject.Properties.Item("Autorun").Value
   if ($existingValue -ne $autoexecPath) {
@@ -23,4 +22,13 @@ if ($NULL -ne $existingValue) {
     { New-Item -Path "HKCU:\Software\Microsoft\Command Processor" -ItemType Registry -Force | Out-Null }
   New-ItemProperty -Path "HKCU:\Software\Microsoft\Command Processor" `
     -Name "AutoRun" -PropertyType String -Value $autoexecPath -Force | Out-Null
+} #if
+
+$envVarsFile = Join-Path -Path $script:scriptDir -ChildPath "local\ao-env_set_vars.bat"
+if (Test-Path -Path $envVarsFile) {
+  Write-Host ("'{0}' already exists. Skipping creation" -f $envVarsFile)
+} else {
+  Write-Host ("Creating '{0}' file using default values" -f $envVarsFile)
+  Copy-Item -Path (Join-Path -Path $script:scriptDir -ChildPath "set_vars_template.bat") `
+    -Destination $envVarsFile
 } #if
