@@ -45,3 +45,8 @@
 /windows/conemu/ConEmu/Addons/FarHere.dat    text eol=crlf
 /windows/conemu/ConEmu/Far2_reg/FarWhite.reg text eol=lf
 /windows/ConEmu_config_template.xml          text eol=lf
+
+# Try not to mangle OpenSSL files
+/windows/openssl/**/*.pl          text eol=crlf
+/windows/openssl/x*/bin/progs.pl  text eol=lf
+/windows/openssl/x*/bin/PEM/demoSRP/srp_verifier.txt  text eol=lf
