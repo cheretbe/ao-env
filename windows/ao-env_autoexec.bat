@@ -18,7 +18,7 @@ IF "%PATH:~-1%"==";" (
 IF EXIST "%~dp0local\ao-env_set_vars.bat" CALL "%~dp0local\ao-env_set_vars.bat"
 
 IF "%ProgramFiles(x86)%"=="" (
-  "%~dp0clink\clink_x86.exe" inject
+  "%~dp0clink\clink_x86.exe" inject --profile "%~dp0local\clink_profile"
 ) ELSE (
-  "%~dp0clink\clink_x64.exe" inject
+  "%~dp0clink\clink_x64.exe" inject --profile "%~dp0local\clink_profile"
 )
