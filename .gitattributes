@@ -24,3 +24,24 @@
 *.dll binary
 *.exe binary
 *.pyd binary
+*.png binary
+
+# Try not to mangle ConEmu files
+/windows/conemu/**/*.map           text  eol=crlf
+/windows/conemu/**/*.lng           text  eol=crlf
+/windows/conemu/**/*.reg           text  eol=crlf
+/windows/conemu/**/*.fml           text  eol=crlf
+/windows/conemu/**/*.lua           text  eol=crlf
+/windows/conemu/**/*.cmd           text  eol=crlf
+/windows/conemu/**/*.pl            text  eol=crlf
+/windows/conemu/**/*.xml           text  eol=crlf
+/windows/conemu/**/*.ans           text  eol=crlf
+/windows/conemu/**/*.farconfig     text  eol=crlf
+/windows/conemu/**/*.conf          text  eol=crlf
+/windows/conemu/**/*.l10n          text  eol=crlf
+/windows/conemu/**/*.sha256        text  eol=crlf
+/windows/conemu/**/*.md            text  eol=crlf
+/windows/conemu/**/*.gitattributes text  eol=crlf
+/windows/conemu/ConEmu/Addons/FarHere.dat    text eol=crlf
+/windows/conemu/ConEmu/Far2_reg/FarWhite.reg text eol=lf
+/windows/ConEmu_config_template.xml          text eol=lf
