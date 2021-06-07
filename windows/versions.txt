@@ -1,0 +1,4 @@
+Clink: 0.4.9
+ConEmu: 210422
+OpenSSL: v1.1.1k
+Python: 3.9.5
