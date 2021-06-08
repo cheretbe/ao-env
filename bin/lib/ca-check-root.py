@@ -4,7 +4,6 @@ import os
 import sys
 import argparse
 import pathlib
-import subprocess
 
 sys.path.append(os.path.dirname(__file__))
 import common
@@ -38,21 +37,32 @@ def main():
     root_ca_cert = pathlib.Path(options.ca_path) / "root_ca/root_ca.crt"
     root_ca_key = pathlib.Path(options.ca_path) / "root_ca/root_ca.key"
 
-    # print(common.get_openssl_executable())
-    # subprocess.check_call([common.get_openssl_executable(), "version"])
-    # return
-
-    if not os.path.isfile(root_ca_key):
-        print(f"Root CA key file [{root_ca_key}] is missing")
+    if not root_ca_key.exists():
+        print(f"\nRoot CA key file [{root_ca_key}] is missing")
         common.ask_for_confirmation(
             "Would you like to create it now?",
             batch_mode=options.batch_mode, default=False
         )
         root_ca_key.parent.mkdir(mode=0o775, parents=True, exist_ok=True)
-        subprocess.check_call([
+        common.run([
             common.get_openssl_executable(),
             "genrsa", "-aes256", "-out", root_ca_key, "4096"
         ])
+
+    if not root_ca_cert.exists():
+        print(f"\nRoot CA certificate [{root_ca_cert}] is missing")
+        common.ask_for_confirmation(
+            "Would you like to create it now?",
+            batch_mode=options.batch_mode, default=False
+        )
+        # 7300 days is 20 years
+        common.run(
+            [
+                common.get_openssl_executable(),
+                "req", "-key", root_ca_key, "-new", "-x509", "-days", "7300",
+                "-sha256", "-out", root_ca_cert
+            ] + common.get_openssl_config()
+        )
 
 if __name__ == "__main__":
     main()
