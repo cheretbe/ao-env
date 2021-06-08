@@ -40,12 +40,12 @@ def get_openssl_config():
         )
     return []
 
-def run(cmd_args, echo=True):
+def run(cmd_args, echo=True, **kwargs):
     if echo:
         print(cmd_args)
-    subprocess.check_call(cmd_args)
+    subprocess.check_call(cmd_args, **kwargs)
 
-def run_with_masked_password(cmd_args, echo=True):
+def run_with_masked_password(cmd_args, echo=True, **kwargs):
     cmd_to_run = []
     cmd_to_print = []
     for arg in cmd_args:
@@ -58,7 +58,7 @@ def run_with_masked_password(cmd_args, echo=True):
 
     if echo:
         print("[{}]".format("], [".join(cmd_to_print)))
-    cmd_rc = subprocess.call(cmd_to_run)
+    cmd_rc = subprocess.call(cmd_to_run, **kwargs)
     if cmd_rc != 0:
         sys.exit(
             "Command [{}] returned non-zero exit status {}".format(

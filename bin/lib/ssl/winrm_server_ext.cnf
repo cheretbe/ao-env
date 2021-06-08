@@ -1,0 +1,3 @@
+[winrm_server_ext]
+extendedKeyUsage = serverAuth,clientAuth
+subjectAltName = $ENV::openssl_SAN
