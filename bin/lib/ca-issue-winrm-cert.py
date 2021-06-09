@@ -58,7 +58,7 @@ def main():
 
     if host_cert_bundle.exists():
         common.ask_for_confirmation(
-            f"'{host_cert_bundle}' exists. Would you like to overwrite it?",
+            f"This will overwrite existing '{host_cert_bundle}'. Continue?",
             batch_mode=options.batch_mode, default=True
         )
 
