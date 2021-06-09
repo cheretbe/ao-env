@@ -15,7 +15,7 @@ def print_verbose(msg, verbose=False):
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "ca_path", nargs="?", default=os.getcwd(),
+        "-c", "--ca-path", default=os.getcwd(),
         help="Path to offline CA directory (default is current working directory)"
     )
     parser.add_argument(

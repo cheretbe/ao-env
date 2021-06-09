@@ -13,12 +13,22 @@ def print_verbose(msg, verbose=False):
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "ca_path", nargs="?", default=os.getcwd(),
+        "host_name", help="Host name (FQDN)"
+    )
+    parser.add_argument(
+        "-c", "--ca-path", default=os.getcwd(),
         help="Path to offline CA directory (default is current working directory)"
     )
     parser.add_argument(
         "-b", "--batch-mode", action="store_true", default=False,
         help="Batch mode"
+    )
+    parser.add_argument(
+        "-p", "--ca-password", default=os.environ.get("AO_ROOT_CA_PASSWORD"),
+        help=(
+            "Root CA key password (can also be specified using AO_ROOT_CA_PASSWORD "
+            "environment variable)"
+        )
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", default=False,
@@ -31,24 +41,22 @@ def parse_arguments():
 def main():
     options = parse_arguments()
 
-    # print("there you go")
-
     root_ca_cert = pathlib.Path(options.ca_path) / "root_ca/root_ca.crt"
     root_ca_key = pathlib.Path(options.ca_path) / "root_ca/root_ca.key"
 
-    host_name = "dummy.domain.tld"
-    host_csr = pathlib.Path(options.ca_path) / f"output/{host_name}.csr"
+    host_csr = pathlib.Path(options.ca_path) / f"output/{options.host_name}.csr"
     host_cert = host_csr.with_suffix(".crt")
     host_cert_key = host_csr.with_suffix(".key")
     ext_file = pathlib.Path(__file__).parent / "ssl" / "winrm_server_ext.cnf"
-
-    host_csr.parent.mkdir(mode=0o775, parents=True, exist_ok=True)
 
     print_verbose(f"Root CA: {root_ca_cert}", options.verbose)
     print_verbose(f"Root CA key: {root_ca_key}", options.verbose)
     print_verbose(f"Certificate request: {host_csr}", options.verbose)
     print_verbose(f"Certificate: {host_cert}", options.verbose)
     print_verbose(f"Certificate key: {host_cert_key}", options.verbose)
+
+    print(f"\nGenerating SSL certificate for host {options.host_name}")
+    host_csr.parent.mkdir(mode=0o775, parents=True, exist_ok=True)
 
     print("\nGenerating private key file")
     common.run_with_masked_password([
@@ -59,45 +67,27 @@ def main():
     ])
 
     print("\nGenerating certificate request file")
-    common.run_with_masked_password([
+    common.run([
         common.get_openssl_executable(),
         "req", "-new", "-nodes", "-sha256", "-key", str(host_cert_key), "-out", str(host_csr),
-        "-subj", f"/CN={host_name}"
+        "-subj", f"/CN={options.host_name}"
     ] + common.get_openssl_config())
 
-# "%~dp0OpenSSL-Win64\bin\openssl.exe" ^
-#   x509 -req -extensions client_server_ssl ^
-#   -extfile "%~dp0openssl-ext.conf" ^
-#   -in "%TEMP%\%DEVICE_CN%.csr" -CA "%~dp0ca-files\ca.cert.pem" -CAkey "%~dp0ca-files\ca.key.pem" -CAcreateserial ^
-#   -out "%TEMP%\%DEVICE_CN%.crt" -days 3650 -sha256
-
     print("\nSigning the certificate")
-    # common.run_with_masked_password(
-    #     [
-    #         common.get_openssl_executable(),
-    #         "x509", "-days", "3650",
-    #         "-extensions", "winrm_server_ext", "-extfile", str(ext_file),
-    #         "-req", "-CA", str(root_ca_cert), "-CAkey", str(root_ca_key), "-CAcreateserial",
-    #         # "-passin", {"format": "pass:{}", "password": "0000"},
-    #         "-in", str(host_csr), "-out", str(host_cert),
-    #     ],
-    #     env={"openssl_SAN": f"DNS:{host_name}"}
-    # )
+    openssl_command = [
+        common.get_openssl_executable(),
+        "x509", "-days", "3650",
+        "-extensions", "winrm_server_ext", "-extfile", str(ext_file),
+        "-req", "-CA", str(root_ca_cert), "-CAkey", str(root_ca_key), "-CAcreateserial"
+    ]
+    if options.ca_password is not None:
+        openssl_command += ["-passin", {"format": "pass:{}", "password": options.ca_password}]
+    openssl_command += ["-in", str(host_csr), "-out", str(host_cert)]
 
-    import subprocess
-    subprocess.check_call(
-        [
-            common.get_openssl_executable(),
-            "x509", "-days", "3650",
-            "-extensions", "winrm_server_ext", "-extfile", str(ext_file),
-            "-req", "-CA", str(root_ca_cert), "-CAkey", str(root_ca_key), "-CAcreateserial",
-            # "-passin", {"format": "pass:{}", "password": "0000"},
-            "-in", str(host_csr), "-out", str(host_cert),
-        ],
-        env={"openssl_SAN": f"DNS:{host_name}"}
+    common.run_with_masked_password(
+        openssl_command,
+        env=dict(os.environ, openssl_SAN=f"DNS:{options.host_name}")
     )
-
-
 
 if __name__ == "__main__":
     main()
