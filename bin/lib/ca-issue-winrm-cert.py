@@ -48,13 +48,19 @@ def main():
     host_csr = pathlib.Path(options.ca_path) / f"output/{options.host_name}.csr"
     host_cert = host_csr.with_suffix(".crt")
     host_cert_key = host_csr.with_suffix(".key")
+    host_cert_bundle = host_csr.with_suffix(".p12")
     ext_file = pathlib.Path(__file__).parent / "ssl" / "winrm_server_ext.cnf"
 
-    print_verbose(f"Root CA: {root_ca_cert}", options.verbose)
-    print_verbose(f"Root CA key: {root_ca_key}", options.verbose)
     print_verbose(f"Certificate request: {host_csr}", options.verbose)
     print_verbose(f"Certificate: {host_cert}", options.verbose)
     print_verbose(f"Certificate key: {host_cert_key}", options.verbose)
+    print_verbose(f"Certificate bundle: {host_cert_bundle}", options.verbose)
+
+    if host_cert_bundle.exists():
+        common.ask_for_confirmation(
+            f"'{host_cert_bundle}' exists. Would you like to overwrite it?",
+            batch_mode=options.batch_mode, default=True
+        )
 
     print(f"\nGenerating SSL certificate for host {options.host_name}")
     host_csr.parent.mkdir(mode=0o775, parents=True, exist_ok=True)
@@ -89,6 +95,23 @@ def main():
         openssl_command,
         env=dict(os.environ, openssl_SAN=f"DNS:{options.host_name}")
     )
+
+    common.color_print_bright(
+        colorama.Fore.CYAN,
+        "\nCombining the key and the certificate into a PKCS12 file"
+    )
+    common.run_with_masked_password([
+        common.get_openssl_executable(),
+        "pkcs12", "-inkey", str(host_cert_key), "-in", str(host_cert),
+        "-export", "-out", str(host_cert_bundle),
+        "-password", {"format": "pass:{}", "password": ""}
+    ])
+    host_csr.unlink()
+    host_cert.unlink()
+    host_cert_key.unlink()
+
+    common.color_print_bright(colorama.Fore.GREEN, "\nDone")
+    print(f"Resulting certificate file is: {host_cert_bundle}")
 
 if __name__ == "__main__":
     main()

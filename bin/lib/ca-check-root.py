@@ -64,5 +64,9 @@ def main():
             ] + common.get_openssl_config()
         )
 
+    print_verbose(f"Root CA: {root_ca_cert}", options.verbose)
+    print_verbose(f"Root CA key: {root_ca_key}", options.verbose)
+
+
 if __name__ == "__main__":
     main()
