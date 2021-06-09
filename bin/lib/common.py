@@ -2,7 +2,21 @@ import sys
 import platform
 import pathlib
 import subprocess
+import colorama
 import humanfriendly.prompts
+
+colorama.init()
+
+def color_print(print_color, msg):
+    print("{color}{msg}{reset}".format(
+        color=print_color, msg=msg, reset=colorama.Style.RESET_ALL
+    ))
+
+def color_print_bright(print_color, msg):
+    print("{color}{msg}{reset}".format(
+        color=print_color + colorama.Style.BRIGHT, msg=msg, reset=colorama.Style.RESET_ALL
+    ))
+
 
 def ask_for_confirmation(prompt, batch_mode, default):
     if batch_mode:

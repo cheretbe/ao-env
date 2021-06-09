@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import pathlib
+import colorama
 
 sys.path.append(os.path.dirname(__file__))
 import common
@@ -58,7 +59,7 @@ def main():
     print(f"\nGenerating SSL certificate for host {options.host_name}")
     host_csr.parent.mkdir(mode=0o775, parents=True, exist_ok=True)
 
-    print("\nGenerating private key file")
+    common.color_print_bright(colorama.Fore.CYAN, "\nGenerating private key file")
     common.run_with_masked_password([
         common.get_openssl_executable(),
         "genrsa", "-out", str(host_cert_key),
@@ -66,14 +67,14 @@ def main():
         "2048",
     ])
 
-    print("\nGenerating certificate request file")
+    common.color_print_bright(colorama.Fore.CYAN, "\nGenerating certificate request file")
     common.run([
         common.get_openssl_executable(),
         "req", "-new", "-nodes", "-sha256", "-key", str(host_cert_key), "-out", str(host_csr),
         "-subj", f"/CN={options.host_name}"
     ] + common.get_openssl_config())
 
-    print("\nSigning the certificate")
+    common.color_print_bright(colorama.Fore.CYAN, "\nSigning the certificate")
     openssl_command = [
         common.get_openssl_executable(),
         "x509", "-days", "3650",
