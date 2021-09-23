@@ -44,7 +44,9 @@ def mock_script_params(mocker_obj, **kwargs):
         return_value=types.SimpleNamespace(**script_params)
     )
 
-def mock_vagrant_cloud_functions(mocker_obj, requests_mock_obj=None, existing_box_ver=None):
+def mock_vagrant_cloud_functions(
+        mocker_obj, requests_mock_obj=None, existing_box_ver=None, box_name="test-file"
+    ):
     mocker_obj.patch(
         "vagrant_box_publish.check_vagrant_cloud_login",
         return_value="test-user-name"
@@ -55,7 +57,7 @@ def mock_vagrant_cloud_functions(mocker_obj, requests_mock_obj=None, existing_bo
         else:
             return_json = {"current_version": {"version": existing_box_ver}}
         requests_mock_obj.get(
-            "https://app.vagrantup.com/api/v1/box/test-user-name/test-file",
+            f"https://app.vagrantup.com/api/v1/box/test-user-name/{box_name}",
             json=return_json
         )
     return mocker_obj.patch(
@@ -242,6 +244,63 @@ def test_version_description(tmpdir, mocker, requests_mock):
         box_description='',
         box_file='test-file.box',
         box_name='test-file', box_version='20110101.1',
+        cloud_user_name='test-user-name',
+        version_description="Version description **test**",
+        dry_run_mode=False
+    )
+
+def test_packer_windows_output_new_version(tmpdir, mocker, requests_mock):
+    """Should use a version description file"""
+
+    # mock_script_params(mocker_obj=mocker, batch=True, box_ver="20210923")
+    mock_script_params(mocker_obj=mocker, batch=True, box_ver="20210923")
+    publish_mock = mock_vagrant_cloud_functions(
+        mocker_obj=mocker,
+        requests_mock_obj=requests_mock,
+        existing_box_ver="20201124.0",
+        box_name="win10_ru_64"
+    )
+
+    with temporary_cwd(tmpdir):
+        pathlib.Path("win10_ru_64_20210923.box").touch()
+        with open("win10_ru_64_20210923.md", "w") as desc_f:
+            desc_f.write("Version description **test**\n")
+        vagrant_box_publish.main()
+
+    # print(publish_mock.call_args)
+    publish_mock.assert_called_once_with(
+        box_description='',
+        box_file='win10_ru_64_20210923.box',
+        box_name='win10_ru_64',
+        box_version='20210923.0',
+        cloud_user_name='test-user-name',
+        version_description="Version description **test**",
+        dry_run_mode=False
+    )
+
+def test_packer_windows_output_existing_version(tmpdir, mocker, requests_mock):
+    """Should use a version description file"""
+
+    mock_script_params(mocker_obj=mocker, batch=True, box_ver="20210923")
+    publish_mock = mock_vagrant_cloud_functions(
+        mocker_obj=mocker,
+        requests_mock_obj=requests_mock,
+        existing_box_ver="20210923.0",
+        box_name="win10_ru_64"
+    )
+
+    with temporary_cwd(tmpdir):
+        pathlib.Path("win10_ru_64_20210923.box").touch()
+        with open("win10_ru_64_20210923.md", "w") as desc_f:
+            desc_f.write("Version description **test**\n")
+        vagrant_box_publish.main()
+
+    # print(publish_mock.call_args)
+    publish_mock.assert_called_once_with(
+        box_description='',
+        box_file='win10_ru_64_20210923.box',
+        box_name='win10_ru_64',
+        box_version='20210923.1',
         cloud_user_name='test-user-name',
         version_description="Version description **test**",
         dry_run_mode=False
