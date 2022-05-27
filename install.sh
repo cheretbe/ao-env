@@ -30,18 +30,30 @@ else
   fi
 fi
 
-echo "Creating '~/.local/share/fonts' directory"
-mkdir -p ~/.local/share/fonts
+# echo "Creating '~/.local/share/fonts' directory"
+# mkdir -p ~/.local/share/fonts
 
-echo "Creating symlink ~/.local/share/fonts/ao-env ==> ${ao_env_root}/fonts"
-ln -sfn ${ao_env_root}/fonts ~/.local/share/fonts/ao-env
+# [!] This breaks fonts for snap installation of Chromium (probably has
+# something to with snap package not having corresponding 'connection')
+# snap connections chromium
+# TODO: check if 'sudo mount --bind ${ao_env_root}/fonts ~/.local/share/fonts/ao-env'
+# will solve the issue
+# echo "Creating symlink ~/.local/share/fonts/ao-env ==> ${ao_env_root}/fonts"
+# ln -sfn ${ao_env_root}/fonts ~/.local/share/fonts/ao-env
 
 virualenv_dir="${HOME}/.cache/ao-env/virtualenv-py3"
 echo "virualenv path: ${virualenv_dir}"
 
+if [[ "$(python3 -c 'import sys; print(sys.version_info.minor)')" == "9" ]]; then
+  python3_exe="python3"
+else
+  python3_exe="python3.9"
+fi
+echo "Python 3 executable: ${python3_exe}"
+
 if [ ! -d "${virualenv_dir}" ]; then
   echo "Creating virualenv"
-  python3 -m venv "${virualenv_dir}"
+  ${python3_exe} -m venv "${virualenv_dir}"
 fi
 
 . "${virualenv_dir}/bin/activate"
