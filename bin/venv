@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if ! (return 0 2>/dev/null); then
+  echo >&2 "ERROR: This script needs to be sourced to run correctly"
+  exit 1
+fi
+
+if [ -z "$1" ]; then
+  echo >&2 "ERROR: No venv name was specified"
+  return 1
+fi
+
+if [ ! -d ~/.cache/venv/${1} ]; then
+  echo "venv '~/.cache/venv/${1}' doesn't exist."
+  read -p "Would you like to create it? [Y/n] " -r
+  if [[ ! $REPLY =~ ^([yY][eE][sS]|[yY]|)$ ]]; then return 1 ; fi
+  python3 -m venv ~/.cache/venv/${1}
+  (
+    . ~/.cache/venv/${1}/bin/activate
+    pip install wheel
+  )
+fi
+
+. ~/.cache/venv/${1}/bin/activate
