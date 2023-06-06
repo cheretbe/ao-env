@@ -6,8 +6,9 @@ if ! (return 0 2>/dev/null); then
 fi
 
 if [ -z "$1" ]; then
-  echo >&2 "ERROR: No venv name was specified"
-  return 1
+  echo "No venv name was specified. The following venvs are available:"
+  ls -1 ~/.cache/venv/
+  return 0
 fi
 
 if [ ! -d ~/.cache/venv/${1} ]; then
